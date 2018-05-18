@@ -3,7 +3,7 @@ import pytest
 from scipy.optimize import check_grad
 from scipy.stats import multivariate_normal
 
-from didypro.reference.numpy.viterbi import viterbi_grad, viterbi_value, \
+from didypro.reference.np.viterbi import viterbi_grad, viterbi_value, \
     viterbi_hessian_prod
 
 
