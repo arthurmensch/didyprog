@@ -2,15 +2,15 @@ import numpy as np
 import pytest
 
 import torch
-from didypro.modules.python.viterbi import ViterbiGrad, Viterbi
+from didypro.reference.pytorch.viterbi import ViterbiGrad, Viterbi
 
-from didypro.reference.tests.test_viterbi import make_data
-from didypro.reference.viterbi import viterbi_grad, viterbi_hessian_prod
+from didypro.reference.numpy.tests.test_viterbi import make_data
+from didypro.reference.numpy.viterbi import viterbi_grad, viterbi_hessian_prod
 
 
 @pytest.mark.parametrize("operator", ['hardmax', 'softmax', 'sparsemax'])
 def test_viterbi(operator):
-    states, emissions, theta = make_data(3)
+    states, emissions, theta = make_data(4)
     nll_ref, grad_ref, _, _ = viterbi_grad(theta, operator=operator)
 
     theta = torch.from_numpy(theta[:, None, :, :])
@@ -29,15 +29,12 @@ def test_viterbi(operator):
 
 @pytest.mark.parametrize("operator", ['softmax', 'sparsemax'])
 def test_viterbi_grad(operator):
-    states, emissions, theta = make_data(10)
+    states, emissions, theta = make_data(4)
     theta = theta / 100
 
     Z = np.zeros_like(theta)
     Z[1, 2, 1] = 1
-    #
-    # rng = np.random.RandomState(0)
-    # Z = rng.randn(*theta.shape)
-    #
+
     _, hessian_prod_ref = viterbi_hessian_prod(theta, Z,
                                                operator=operator)
 
@@ -51,5 +48,4 @@ def test_viterbi_grad(operator):
     v_h.backward()
     hessian_prod = theta.grad[:, 0].numpy()
 
-    assert np.testing.assert_array_almost_equal(hessian_prod,
-                                                hessian_prod_ref)
+    np.testing.assert_array_almost_equal(hessian_prod, hessian_prod_ref)

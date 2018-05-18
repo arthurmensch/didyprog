@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from didypro.reference.dtw import dtw_value, dtw_grad, dtw_hessian_prod
+from didypro.reference.numpy.dtw import dtw_value, dtw_grad, dtw_hessian_prod
 from scipy.optimize import check_grad
 from sklearn.metrics.pairwise import pairwise_distances
 
@@ -31,13 +31,16 @@ def test_dtw_grad(operator):
     C = make_data()
 
     def func(X):
+        X = X.reshape(C.shape)
         return dtw_value(X, operator=operator)
 
     def grad(X):
-        _, grad, _, _ = dtw_grad(X, operator=operator)
-        return grad
+        X = X.reshape(C.shape)
+        _, g, _, _ = dtw_grad(X, operator=operator)
+        return g.ravel()
 
-    check_grad(func, grad, C)
+    err = check_grad(func, grad, C.ravel())
+    assert err < 1e-6
 
 
 @pytest.mark.parametrize("operator", ['hardmax', 'softmax', 'sparsemax'])
@@ -56,4 +59,5 @@ def test_viterbi_hessian(operator):
         return H.ravel()
 
     # check_grad does not work with ndarray of dim > 2
-    check_grad(func, grad, theta.ravel())
+    err = check_grad(func, grad, theta.ravel())
+    assert err < 1e-6

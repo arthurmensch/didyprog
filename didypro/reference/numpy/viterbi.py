@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from didypro.reference.local import HardMaxOp, BaseOp, operators
+from didypro.reference.numpy.local import operators
 
 import numpy as np
 
@@ -48,7 +48,7 @@ def viterbi_grad(theta: np.ndarray,
     Q = np.zeros((T + 2, S, S))
     U = np.zeros((T + 2, S))
     E = np.zeros((T + 1, S, S))
-    V[0, 1:] = -1e10
+    # V[0, 1:] = -1e10
     for t in range(1, T + 1):
         for i in range(S):
             # t - 1 corresponds to padding vector theta
@@ -92,7 +92,7 @@ def viterbi_hessian_prod(theta: np.ndarray, Z: np.ndarray,
     for t in range(1, T + 1):
         for i in range(S):
             M = Z[t - 1, i] + Vdot[t - 1]
-            Vdot[t] = np.sum(Q[t] * M, axis=1)
+            Vdot[t, i] = np.sum(Q[t, i] * M)
             H = operator.jacobian(Q[t, i])
             Qdot[t, i] = H.dot(M)
     vdot: float = np.sum(Q[T + 1, 0] * Vdot[T])

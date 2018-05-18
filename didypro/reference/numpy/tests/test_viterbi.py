@@ -3,8 +3,7 @@ import pytest
 from scipy.optimize import check_grad
 from scipy.stats import multivariate_normal
 
-from didypro.reference.local import HardMaxOp, SoftMaxOp, SparseMaxOp
-from didypro.reference.viterbi import viterbi_grad, viterbi_value, \
+from didypro.reference.numpy.viterbi import viterbi_grad, viterbi_value, \
     viterbi_hessian_prod
 
 
@@ -79,6 +78,7 @@ def test_viterbi(operator):
 @pytest.mark.parametrize("operator", ['hardmax', 'softmax', 'sparsemax'])
 def test_viterbi_grad(operator):
     states, emissions, theta = make_data()
+    theta /= 100
 
     def func(X):
         X = X.reshape(theta.shape)
@@ -90,13 +90,18 @@ def test_viterbi_grad(operator):
         return grad.ravel()
 
     # check_grad does not work with ndarray of dim > 2
-    check_grad(func, grad, theta.ravel())
+    err = check_grad(func, grad, theta.ravel())
+    if operator == 'sparsemax':
+        assert err < 1e-4
+    else:
+        assert err < 1e-6
 
 
 @pytest.mark.parametrize("operator", ['hardmax', 'softmax', 'sparsemax'])
 def test_viterbi_hessian(operator):
     states, emissions, theta = make_data()
 
+    theta /= 100
     Z = np.random.randn(*theta.shape)
 
     def func(X):
@@ -110,4 +115,8 @@ def test_viterbi_hessian(operator):
         return H.ravel()
 
     # check_grad does not work with ndarray of dim > 2
-    check_grad(func, grad, theta.ravel())
+    err = check_grad(func, grad, theta.ravel())
+    if operator == 'sparsemax':
+        assert err < 1e-4
+    else:
+        assert err < 1e-6

@@ -49,7 +49,8 @@ class SoftMaxOp(BaseOp):
 
         :param x: np.ndarray, shape = (n,)
             Vector to project
-        :return:
+        :return: Tuple[float, np.ndarray]
+            max(x), argmax(x)
         """
         max_x = np.max(x)
         exp_x = np.exp(x - max_x)
@@ -81,7 +82,8 @@ class SparseMaxOp(BaseOp):
 
         :param x: np.ndarray, shape = (n,)
             Vector to project
-        :return:
+        :return: Tuple[float, np.ndarray]
+            max(x), argmax(x)
         """
         n_features = x.shape[0]
         u = np.sort(x)[::-1]
