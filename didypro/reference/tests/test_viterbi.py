@@ -68,7 +68,7 @@ def make_data(T=20):
     return states, emissions, theta
 
 
-@pytest.mark.parametrize("operator", [HardMaxOp, SoftMaxOp, SparseMaxOp])
+@pytest.mark.parametrize("operator", ['hardmax', 'softmax', 'sparsemax'])
 def test_viterbi(operator):
     states, emissions, theta = make_data()
     viterbi, grad, _, _ = viterbi_grad(theta, operator=operator)
@@ -76,7 +76,7 @@ def test_viterbi(operator):
     assert np.all(decoded == states)
 
 
-@pytest.mark.parametrize("operator", [HardMaxOp, SoftMaxOp, SparseMaxOp])
+@pytest.mark.parametrize("operator", ['hardmax', 'softmax', 'sparsemax'])
 def test_viterbi_grad(operator):
     states, emissions, theta = make_data()
 
@@ -93,7 +93,7 @@ def test_viterbi_grad(operator):
     check_grad(func, grad, theta.ravel())
 
 
-@pytest.mark.parametrize("operator", [HardMaxOp, SoftMaxOp, SparseMaxOp])
+@pytest.mark.parametrize("operator", ['hardmax', 'softmax', 'sparsemax'])
 def test_viterbi_hessian(operator):
     states, emissions, theta = make_data()
 

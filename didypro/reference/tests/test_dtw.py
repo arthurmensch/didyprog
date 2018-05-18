@@ -1,10 +1,8 @@
 import numpy as np
 import pytest
+from didypro.reference.dtw import dtw_value, dtw_grad, dtw_hessian_prod
 from scipy.optimize import check_grad
 from sklearn.metrics.pairwise import pairwise_distances
-
-from didypro.reference.dtw import dtw_value, dtw_grad, dtw_hessian_prod
-from didypro.reference.local import SoftMaxOp, SparseMaxOp, HardMaxOp
 
 
 def make_data():
@@ -17,18 +15,18 @@ def make_data():
 
 def test_dtw():
     C = make_data()
-    dtw = dtw_value(C, operator=HardMaxOp)
+    dtw = dtw_value(C, operator='hardmax')
 
-    _, grad, _, _ = dtw_grad(C, operator=HardMaxOp)
-    _, soft_grad, _, _ = dtw_grad(C, operator=SoftMaxOp)
-    _, sparse_grad, _, _ = dtw_grad(C, operator=SparseMaxOp)
+    _, grad, _, _ = dtw_grad(C, operator='hardmax')
+    _, soft_grad, _, _ = dtw_grad(C, operator='softmax')
+    _, sparse_grad, _, _ = dtw_grad(C, operator='sparsemax')
 
     assert(dtw == np.sum(grad * C))
     assert(dtw < np.sum(soft_grad * C))
     assert(dtw < np.sum(sparse_grad * C))
 
 
-@pytest.mark.parametrize("operator", [HardMaxOp, SoftMaxOp, SparseMaxOp])
+@pytest.mark.parametrize("operator", ['hardmax', 'softmax', 'sparsemax'])
 def test_dtw_grad(operator):
     C = make_data()
 
@@ -42,8 +40,7 @@ def test_dtw_grad(operator):
     check_grad(func, grad, C)
 
 
-
-@pytest.mark.parametrize("operator", [HardMaxOp, SoftMaxOp, SparseMaxOp])
+@pytest.mark.parametrize("operator", ['hardmax', 'softmax', 'sparsemax'])
 def test_viterbi_hessian(operator):
     theta = make_data()
     Z = np.random.randn(*theta.shape)

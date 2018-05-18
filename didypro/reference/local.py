@@ -142,3 +142,7 @@ class HardMaxOp(BaseOp):
         """
         n_features = p.shape[0]
         return np.zeros((n_features, n_features))
+
+
+operators = {'softmax': SoftMaxOp, 'sparsemax': SparseMaxOp,
+             'hardmax': HardMaxOp}

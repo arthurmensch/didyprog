@@ -1,16 +1,16 @@
 import numpy as np
 
-from didypro.reference.local import HardMaxOp, BaseOp
+from didypro.reference.local import HardMaxOp, BaseOp, operators
 from typing import Tuple
 
 
-def dtw_value(theta: np.ndarray, operator: BaseOp =HardMaxOp) -> float:
+def dtw_value(theta: np.ndarray, operator: str = 'hardmax') -> float:
     """
     DTW operator.
 
     :param theta: np.ndarray, shape = (m, n),
         Distance matrix for DTW
-    :param operator: BaseOP,
+    :param operator: str in {'hardmax', 'softmax', 'sparsemax'},
         Smoothed max-operator
     :return: float,
         DTW value, $DTW(\theta)$
@@ -18,7 +18,7 @@ def dtw_value(theta: np.ndarray, operator: BaseOp =HardMaxOp) -> float:
     return dtw_grad(theta, operator)[0]
 
 
-def dtw_grad(theta: np.ndarray, operator: BaseOp = HardMaxOp) \
+def dtw_grad(theta: np.ndarray, operator: str = 'hardmax') \
         -> Tuple[float, np.ndarray, np.ndarray, np.ndarray]:
     """
     Value and gradient of the DTW operator.
@@ -27,7 +27,7 @@ def dtw_grad(theta: np.ndarray, operator: BaseOp = HardMaxOp) \
 
     :param theta: np.ndarray, shape = (m, n),
         Distance matrix for DTW
-    :param operator: BaseOP,
+    :param operator: str in {'hardmax', 'softmax', 'sparsemax'},
         Smoothed max-operator
     :return: Tuple[float, np.ndarray],
         v: float,
@@ -39,6 +39,8 @@ def dtw_grad(theta: np.ndarray, operator: BaseOp = HardMaxOp) \
         E: np.ndarray,
             Intermediary computations
     """
+    operator = operators[operator]
+
     m, n = theta.shape
 
     V = np.zeros((m + 1, n + 1))
@@ -71,7 +73,7 @@ def dtw_grad(theta: np.ndarray, operator: BaseOp = HardMaxOp) \
     return V[m, n], E[1:m + 1, 1:n + 1], Q, E
 
 
-def dtw_hessian_prod(theta, Z, operator: BaseOp = HardMaxOp)\
+def dtw_hessian_prod(theta, Z, operator: str = 'hardmax')\
         -> Tuple[float, np.ndarray]:
     """
     Dir. derivative and Hessian-vector product of the DTW operator.
@@ -82,7 +84,7 @@ def dtw_hessian_prod(theta, Z, operator: BaseOp = HardMaxOp)\
         Distance matrix for DTW
     :param Z: np.ndarray, shape = (m, n)
         Direction in which to compute the Hessian-vector product
-    :param operator: BaseOP
+    :param operator: str in {'hardmax', 'softmax', 'sparsemax'},
         Smoothed max-operator
     :return: Tuple[float, np.ndarray],
         vdot: float,
@@ -91,6 +93,7 @@ def dtw_hessian_prod(theta, Z, operator: BaseOp = HardMaxOp)\
             directional derivative $\nabla^2 DTW(\theta) Z$
     """
     _, _, Q, E = dtw_grad(theta, operator)
+    operator = operators[operator]
 
     m, n = Z.shape
 

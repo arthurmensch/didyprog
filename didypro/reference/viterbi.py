@@ -1,18 +1,18 @@
 from typing import Tuple
 
-from didypro.reference.local import HardMaxOp, BaseOp
+from didypro.reference.local import HardMaxOp, BaseOp, operators
 
 import numpy as np
 
 
-def viterbi_value(theta: np.ndarray, operator: BaseOp =HardMaxOp)\
+def viterbi_value(theta: np.ndarray, operator: str = 'hardmax') \
         -> float:
     """
     Viterbi operator.
 
     :param theta: np.ndarray, shape = (T, S, S),
         Holds the potentials of the linear chain CRF
-    :param operator: BaseOP,
+    :param operator: str in {'hardmax', 'softmax', 'sparsemax'},
         Smoothed max-operator
     :return: float,
         DTW value $Vit(\theta)$
@@ -21,7 +21,7 @@ def viterbi_value(theta: np.ndarray, operator: BaseOp =HardMaxOp)\
 
 
 def viterbi_grad(theta: np.ndarray,
-                 operator: BaseOp = HardMaxOp)\
+                 operator: str = 'hardmax') \
         -> Tuple[float, np.ndarray, np.ndarray, np.ndarray]:
     """
     Value and gradient of the Viterbi operator.
@@ -30,7 +30,7 @@ def viterbi_grad(theta: np.ndarray,
 
     :param theta: np.ndarray, shape = (T, S, S),
         Holds the potentials of the linear chain CRF
-    :param operator: BaseOP,
+    :param operator: str in {'hardmax', 'softmax', 'sparsemax'},
         Smoothed max-operator
     :return: Tuple[float, np.ndarray, np.ndarray, np.ndarray],
         v: float,
@@ -42,12 +42,13 @@ def viterbi_grad(theta: np.ndarray,
         U: np.ndarray,
             Intermediary computations
     """
+    operator = operators[operator]
     T, S, _ = theta.shape
     V = np.zeros((T + 1, S))
     Q = np.zeros((T + 2, S, S))
     U = np.zeros((T + 2, S))
     E = np.zeros((T + 1, S, S))
-
+    V[0, 1:] = -1e10
     for t in range(1, T + 1):
         for i in range(S):
             # t - 1 corresponds to padding vector theta
@@ -61,7 +62,7 @@ def viterbi_grad(theta: np.ndarray,
 
 
 def viterbi_hessian_prod(theta: np.ndarray, Z: np.ndarray,
-                            operator=HardMaxOp) -> Tuple[float, np.ndarray]:
+                         operator: str = 'hardmax') -> Tuple[float, np.ndarray]:
     """
     Dir. derivative and Hessian-vector product of the Viterbi operator.
 
@@ -71,7 +72,7 @@ def viterbi_hessian_prod(theta: np.ndarray, Z: np.ndarray,
         Holds the potentials of the linear chain CRF
     :param Z: np.ndarray, shape = (T, S, S)
         Direction in which to compute the Hessian-vector product
-    :param operator: BaseOP
+    :param operator: str in {'hardmax', 'softmax', 'sparsemax'},
         Smoothed max-operator
     :return: Tuple[float, np.ndarray],
         vdot: directional derivative
@@ -79,8 +80,8 @@ def viterbi_hessian_prod(theta: np.ndarray, Z: np.ndarray,
         hessian_prod: np.ndarray, (T, S, S),
             Hessian product $\nabla^2 Vit(\theta) Z$
     """
-
     _, _, Q, U = viterbi_grad(theta, operator)
+    operator = operators[operator]
 
     T, S, _ = Z.shape
     Vdot = np.zeros((T + 1, S))
@@ -94,7 +95,7 @@ def viterbi_hessian_prod(theta: np.ndarray, Z: np.ndarray,
             Vdot[t] = np.sum(Q[t] * M, axis=1)
             H = operator.jacobian(Q[t, i])
             Qdot[t, i] = H.dot(M)
-    vdot : float = np.sum(Q[T + 1, 0] * Vdot[T])
+    vdot: float = np.sum(Q[T + 1, 0] * Vdot[T])
     H = operator.jacobian(Q[T + 1, 0])
     Qdot[T + 1, 0] = H.dot(Vdot[T])
     for t in reversed(range(0, T + 1)):
