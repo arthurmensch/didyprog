@@ -5,7 +5,7 @@ from scipy.stats import multivariate_normal
 
 from didypro.reference.local import HardMaxOp, SoftMaxOp, SparseMaxOp
 from didypro.reference.viterbi import viterbi_grad, viterbi_value, \
-    viterbi_hessian_product
+    viterbi_hessian_prod
 
 
 def sample(transition_matrix,
@@ -29,7 +29,10 @@ def sample(transition_matrix,
 
 
 def make_data(T=20):
-    """Sample data from a HMM model and compute associated CRF potentials."""
+    """
+    Sample data from a HMM model and compute associated CRF potentials.
+    """
+
     random_state = np.random.RandomState(0)
 
     transition_matrix = np.array([[0.5, 0.1, 0.1],
@@ -74,7 +77,7 @@ def test_viterbi(operator):
 
 
 @pytest.mark.parametrize("operator", [HardMaxOp, SoftMaxOp, SparseMaxOp])
-def test_dtw_grad(operator):
+def test_viterbi_grad(operator):
     states, emissions, theta = make_data()
 
     def func(X):
@@ -91,21 +94,20 @@ def test_dtw_grad(operator):
 
 
 @pytest.mark.parametrize("operator", [HardMaxOp, SoftMaxOp, SparseMaxOp])
-def test_dtw_hessian(operator):
+def test_viterbi_hessian(operator):
     states, emissions, theta = make_data()
 
-    S = np.random.randn(*theta.shape)
+    Z = np.random.randn(*theta.shape)
 
     def func(X):
         X = X.reshape(theta.shape)
         _, grad, _, _ = viterbi_grad(X, operator=operator)
-        return np.sum(grad * S)
+        return np.sum(grad * Z)
 
     def grad(X):
         X = X.reshape(theta.shape)
-        _, grad, U, Q = viterbi_grad(X, operator=operator)
-        viterbi_hessian_product(U, Q, X, operator=operator)
-        return grad.ravel()
+        _, H = viterbi_hessian_prod(X, Z, operator=operator)
+        return H.ravel()
 
     # check_grad does not work with ndarray of dim > 2
     check_grad(func, grad, theta.ravel())

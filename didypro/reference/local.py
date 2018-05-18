@@ -7,7 +7,10 @@ import numpy as np
 
 
 class BaseOp:
-    """Base class for smoothed max/min operation"""
+    """
+    Base class for smoothed max/min operation
+    """
+
     @staticmethod
     def max(x: np.ndarray) -> Tuple[float, np.ndarray]:
         raise NotImplementedError
@@ -35,12 +38,19 @@ class BaseOp:
 
 
 class SoftMaxOp(BaseOp):
-    """The soft(arg)max operations.
-
-    Solves max_{p \in \Delta^d} <x, p> - \sum_{i=1}^d p_i \log(p_i)
     """
+    The soft(arg)max operations.
+    """
+
     @staticmethod
     def max(x: np.ndarray) -> Tuple[float, np.ndarray]:
+        """
+        Solves $max_{p \in \Delta^d} <x, p> - \sum_{i=1}^d p_i \log(p_i)$.
+
+        :param x: np.ndarray, shape = (n,)
+            Vector to project
+        :return:
+        """
         max_x = np.max(x)
         exp_x = np.exp(x - max_x)
         Z = np.sum(exp_x)
@@ -48,17 +58,31 @@ class SoftMaxOp(BaseOp):
 
     @staticmethod
     def jacobian(p: np.ndarray) -> np.ndarray:
+        """
+        Compute the Jacobian of argmax using the gradient of max.
+
+        :param p: np.ndarray, shape = (p)
+            Gradient of max(x)
+        :return: np.ndarray, shape = (p, p)
+            Jacobian of argmax(x)
+        """
         return np.diag(p) - np.outer(p, p)
 
 
 class SparseMaxOp(BaseOp):
-    """The sparsemax operations.
-
-    Solves max_{p \in \Delta^d} <x, p> - \frac{1}{2} \sum_{i=1}^d p_i^2
+    """
+    The sparsemax operations.
     """
 
     @classmethod
     def max(self, x: np.ndarray) -> Tuple[float, np.ndarray]:
+        """
+        Solves max_{p \in \Delta^d} <x, p> - \frac{1}{2} \sum_{i=1}^d p_i^2.
+
+        :param x: np.ndarray, shape = (n,)
+            Vector to project
+        :return:
+        """
         n_features = x.shape[0]
         u = np.sort(x)[::-1]
         z = np.ones_like(x)
@@ -73,17 +97,33 @@ class SparseMaxOp(BaseOp):
 
     @staticmethod
     def jacobian(p: np.ndarray) -> np.ndarray:
+        """
+        Compute the Jacobian of argmax using the gradient of max.
+
+        :param p: np.ndarray, shape = (p)
+            Gradient of max(x)
+        :return: np.ndarray, shape = (p, p)
+            Jacobian of argmax(x)
+        """
         s = p > 0
         return np.diag(s) - np.outer(s, s) / np.sum(s)
 
 
 class HardMaxOp(BaseOp):
-    """The regular max operations.
-
-        Solves max_{p \in \Delta^d} <x, p>
     """
+    The regular max operations.
+    """
+
     @staticmethod
     def max(x: np.ndarray) -> Tuple[float, np.ndarray]:
+        """
+        Solves max_{p \in \Delta^d} <x, p>
+
+        :param x: np.ndarray, shape = (n,)
+            Vector to project
+        :return: Tuple[float, np.ndarray]
+            max(x), argmax(x)
+        """
         i = np.argmax(x)
         argmax_x = np.zeros_like(x)
         argmax_x[i] = 1
@@ -92,5 +132,13 @@ class HardMaxOp(BaseOp):
 
     @staticmethod
     def jacobian(p: np.ndarray) -> np.ndarray:
+        """
+        Compute the Jacobian of argmax using the gradient of max.
+
+        :param p: np.ndarray, shape = (p)
+            Gradient of max(x)
+        :return: np.ndarray, shape = (p, p)
+            Jacobian of argmax(x)
+        """
         n_features = p.shape[0]
         return np.zeros((n_features, n_features))

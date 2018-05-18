@@ -5,12 +5,23 @@ from typing import Tuple
 
 
 def dtw_value(theta: np.ndarray, operator: BaseOp =HardMaxOp) -> float:
+    """
+    DTW operator.
+
+    :param theta: np.ndarray, shape = (m, n),
+        Distance matrix for DTW
+    :param operator: BaseOP,
+        Smoothed max-operator
+    :return: float,
+        DTW value, $DTW(\theta)$
+    """
     return dtw_grad(theta, operator)[0]
 
 
 def dtw_grad(theta: np.ndarray, operator: BaseOp = HardMaxOp) \
         -> Tuple[float, np.ndarray, np.ndarray, np.ndarray]:
-    """Value and gradient of the DTW operator.
+    """
+    Value and gradient of the DTW operator.
 
     Algorithm 5 in the paper.
 
@@ -62,7 +73,8 @@ def dtw_grad(theta: np.ndarray, operator: BaseOp = HardMaxOp) \
 
 def dtw_hessian_prod(theta, Z, operator: BaseOp = HardMaxOp)\
         -> Tuple[float, np.ndarray]:
-    """Dir. derivative and Hessian-vector product of the DTW operator.
+    """
+    Dir. derivative and Hessian-vector product of the DTW operator.
 
     Algorithm 6 in the paper.
 

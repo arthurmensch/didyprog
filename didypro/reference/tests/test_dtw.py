@@ -3,7 +3,7 @@ import pytest
 from scipy.optimize import check_grad
 from sklearn.metrics.pairwise import pairwise_distances
 
-from didypro.reference.dtw import dtw_value, dtw_grad
+from didypro.reference.dtw import dtw_value, dtw_grad, dtw_hessian_prod
 from didypro.reference.local import SoftMaxOp, SparseMaxOp, HardMaxOp
 
 
@@ -40,3 +40,23 @@ def test_dtw_grad(operator):
         return grad
 
     check_grad(func, grad, C)
+
+
+
+@pytest.mark.parametrize("operator", [HardMaxOp, SoftMaxOp, SparseMaxOp])
+def test_viterbi_hessian(operator):
+    theta = make_data()
+    Z = np.random.randn(*theta.shape)
+
+    def func(X):
+        X = X.reshape(theta.shape)
+        _, grad, _, _ = dtw_grad(X, operator=operator)
+        return np.sum(grad * Z)
+
+    def grad(X):
+        X = X.reshape(theta.shape)
+        v, H = dtw_hessian_prod(X, Z, operator=operator)
+        return H.ravel()
+
+    # check_grad does not work with ndarray of dim > 2
+    check_grad(func, grad, theta.ravel())
