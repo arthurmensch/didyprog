@@ -79,12 +79,10 @@ def _reverse_loop(Q, Qt, Ut, batch_sizes, adjoint=False,
 
     if adjoint:
         Ed = new(L + B, S, S).zero_()
-        Edoff = new(L, S, S).zero_()
         Ud = new(L + B, S).zero_()
         Udt = new(B).zero_()
     else:
         E = new(L + B, S, S).zero_()
-        Eoff = new(L, S, S).zero_()
         U = new(L + B, S).zero_()
         # Ut = Ut
 
@@ -105,18 +103,15 @@ def _reverse_loop(Q, Qt, Ut, batch_sizes, adjoint=False,
         if prev_length != 0:
             prev_left, prev_cut = right, right + prev_length
             if adjoint:
-                Ed[left:cut] = (Q[prev_left:prev_cut] *
-                                Ud[prev_left:prev_cut][:, :, None] +
-                                Qd[prev_left:prev_cut] *
-                                U[prev_left:prev_cut][:, :, None])
-                Ud[left:cut] = torch.sum(Ed[left:cut], dim=1)
-                # TODO remove
-                Edoff[off_left:off_right] = Ed[left:cut]
+                Ed[off_left:off_right] = (Q[prev_left:prev_cut] *
+                                          Ud[prev_left:prev_cut][:, :, None] +
+                                          Qd[prev_left:prev_cut] *
+                                          U[prev_left:prev_cut][:, :, None])
+                Ud[left:cut] = torch.sum(Ed[off_left:off_right], dim=1)
             else:
-                E[left:cut] = (Q[prev_left:prev_cut] *
-                               U[prev_left:prev_cut][:, :, None])
-                U[left:cut] = torch.sum(E[left:cut], dim=1)
-                Eoff[off_left:off_right] = E[left:cut]
+                E[off_left:off_right] = (Q[prev_left:prev_cut] *
+                                         U[prev_left:prev_cut][:, :, None])
+                U[left:cut] = torch.sum(E[off_left:off_right], dim=1)
         term_right = term_left + len_term
         if len_term > 0:
             if adjoint:
@@ -133,9 +128,9 @@ def _reverse_loop(Q, Qt, Ut, batch_sizes, adjoint=False,
         off_right = off_left
         prev_length = cur_length
     if not adjoint:
-        return Eoff, U, Ut
+        return E, U, Ut
     else:
-        return Edoff, Ud, Udt
+        return Ed, Ud, Udt
 
 
 class ViterbiFunction(torch.autograd.Function):
@@ -152,18 +147,18 @@ class ViterbiFunction(torch.autograd.Function):
         theta, Q, Qt = ctx.saved_tensors
         batch_sizes, operator = ctx.others
         return ViterbiFunctionBackward.apply(theta,
-            M, Q, Qt, batch_sizes, operator), None, None
+                                             M, Q, Qt, batch_sizes,
+                                             operator), None, None
 
 
 class ViterbiFunctionBackward(torch.autograd.Function):
-
     @staticmethod
     def forward(ctx, theta, M, Q, Qt, batch_sizes, operator):
-        Eoff, U, Ut = _reverse_loop(Q, Qt, M, batch_sizes,
-                                    adjoint=False)
+        E, U, Ut = _reverse_loop(Q, Qt, M, batch_sizes,
+                                 adjoint=False)
         ctx.save_for_backward(Q, Qt, U, Ut)
         ctx.others = batch_sizes, operator
-        return Eoff
+        return E
 
     @staticmethod
     def backward(ctx, Z):
@@ -173,11 +168,11 @@ class ViterbiFunctionBackward(torch.autograd.Function):
                                          operator=operator,
                                          adjoint=True,
                                          Q=Q, Qt=Qt)
-        Edoff, Ud, Udt = _reverse_loop(Q, Qt, Ut, batch_sizes,
-                                       adjoint=True,
-                                       Qd=Qd, Qdt=Qdt,
-                                       U=U)
-        return Edoff, Vdt, None, None, None, None
+        Ed, _, _ = _reverse_loop(Q, Qt, Ut, batch_sizes,
+                                 adjoint=True,
+                                 Qd=Qd, Qdt=Qdt,
+                                 U=U)
+        return Ed, Vdt, None, None, None, None
 
 
 class PackedViterbi(nn.Module):
@@ -197,6 +192,7 @@ class Viterbi(nn.Module):
     def forward(self, theta, lengths=None):
         if lengths is None:
             lengths = torch.LongTensor(theta.shape[1],
-                                       device=theta.device).fill_(theta.shape[0])
+                                       device=theta.device).fill_(
+                theta.shape[0])
         theta, batch_sizes = pack_padded_sequence(theta, lengths)
         return ViterbiFunction.apply(theta, batch_sizes, self.operator)

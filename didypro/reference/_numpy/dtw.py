@@ -1,6 +1,6 @@
 import numpy as np
 
-from didypro.reference.np.local import operators
+from didypro.reference._numpy.local import operators
 from typing import Tuple
 
 
@@ -8,7 +8,7 @@ def dtw_value(theta: np.ndarray, operator: str = 'hardmax') -> float:
     """
     DTW operator.
 
-    :param theta: np.ndarray, shape = (m, n),
+    :param theta: _numpy.ndarray, shape = (m, n),
         Distance matrix for DTW
     :param operator: str in {'hardmax', 'softmax', 'sparsemax'},
         Smoothed max-operator
@@ -25,18 +25,18 @@ def dtw_grad(theta: np.ndarray, operator: str = 'hardmax') \
 
     Algorithm 5 in the paper.
 
-    :param theta: np.ndarray, shape = (m, n),
+    :param theta: _numpy.ndarray, shape = (m, n),
         Distance matrix for DTW
     :param operator: str in {'hardmax', 'softmax', 'sparsemax'},
         Smoothed max-operator
-    :return: Tuple[float, np.ndarray],
+    :return: Tuple[float, _numpy.ndarray],
         v: float,
             DTW value, $DTW(\theta)$
-        grad: np.ndarray, shape = (m, n),
+        grad: _numpy.ndarray, shape = (m, n),
             DTW gradient, $\nabla DTW(\theta)$
-        Q: np.ndarray
+        Q: _numpy.ndarray
             Intermediary computations
-        E: np.ndarray,
+        E: _numpy.ndarray,
             Intermediary computations
     """
     operator = operators[operator]
@@ -80,16 +80,16 @@ def dtw_hessian_prod(theta, Z, operator: str = 'hardmax')\
 
     Algorithm 6 in the paper.
 
-    :param theta: np.ndarray, shape = (m, n)
+    :param theta: _numpy.ndarray, shape = (m, n)
         Distance matrix for DTW
-    :param Z: np.ndarray, shape = (m, n)
+    :param Z: _numpy.ndarray, shape = (m, n)
         Direction in which to compute the Hessian-vector product
     :param operator: str in {'hardmax', 'softmax', 'sparsemax'},
         Smoothed max-operator
-    :return: Tuple[float, np.ndarray],
+    :return: Tuple[float, _numpy.ndarray],
         vdot: float,
             directional derivative $<\nabla DTW(\theta), Z>$
-        hessian_prod: np.ndarray, shape = (m, n),
+        hessian_prod: _numpy.ndarray, shape = (m, n),
             directional derivative $\nabla^2 DTW(\theta) Z$
     """
     _, _, Q, E = dtw_grad(theta, operator)

@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from didypro.reference.np.local import operators
+from didypro.reference._numpy.local import operators
 
 import numpy as np
 
@@ -10,7 +10,7 @@ def viterbi_value(theta: np.ndarray, operator: str = 'hardmax') \
     """
     Viterbi operator.
 
-    :param theta: np.ndarray, shape = (T, S, S),
+    :param theta: _numpy.ndarray, shape = (T, S, S),
         Holds the potentials of the linear chain CRF
     :param operator: str in {'hardmax', 'softmax', 'sparsemax'},
         Smoothed max-operator
@@ -28,18 +28,18 @@ def viterbi_grad(theta: np.ndarray,
 
     Algorithm 3 in the paper.
 
-    :param theta: np.ndarray, shape = (T, S, S),
+    :param theta: _numpy.ndarray, shape = (T, S, S),
         Holds the potentials of the linear chain CRF
     :param operator: str in {'hardmax', 'softmax', 'sparsemax'},
         Smoothed max-operator
-    :return: Tuple[float, np.ndarray, np.ndarray, np.ndarray],
+    :return: Tuple[float, _numpy.ndarray, _numpy.ndarray, _numpy.ndarray],
         v: float,
             Viterbi value $Vit(\theta)$
-        grad: np.ndarray, shape = (T, S, S),
+        grad: _numpy.ndarray, shape = (T, S, S),
             Viterbi gradient, $\nabla Vit(\theta)$
-        Q: np.ndarray,
+        Q: _numpy.ndarray,
             Intermediary computations
-        U: np.ndarray,
+        U: _numpy.ndarray,
             Intermediary computations
     """
     operator = operators[operator]
@@ -68,16 +68,16 @@ def viterbi_hessian_prod(theta: np.ndarray, Z: np.ndarray,
 
     Algorithm 4 in the paper.
 
-    :param theta: np.ndarray, shape = (T, S, S)
+    :param theta: _numpy.ndarray, shape = (T, S, S)
         Holds the potentials of the linear chain CRF
-    :param Z: np.ndarray, shape = (T, S, S)
+    :param Z: _numpy.ndarray, shape = (T, S, S)
         Direction in which to compute the Hessian-vector product
     :param operator: str in {'hardmax', 'softmax', 'sparsemax'},
         Smoothed max-operator
-    :return: Tuple[float, np.ndarray],
+    :return: Tuple[float, _numpy.ndarray],
         vdot: directional derivative
             $<\nabla Vit(\theta), Z>$
-        hessian_prod: np.ndarray, (T, S, S),
+        hessian_prod: _numpy.ndarray, (T, S, S),
             Hessian product $\nabla^2 Vit(\theta) Z$
     """
     _, _, Q, U = viterbi_grad(theta, operator)

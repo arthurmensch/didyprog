@@ -47,9 +47,9 @@ class SoftMaxOp(BaseOp):
         """
         Solves $max_{p \in \Delta^d} <x, p> - \sum_{i=1}^d p_i \log(p_i)$.
 
-        :param x: np.ndarray, shape = (n,)
+        :param x: _numpy.ndarray, shape = (n,)
             Vector to project
-        :return: Tuple[float, np.ndarray]
+        :return: Tuple[float, _numpy.ndarray]
             max(x), argmax(x)
         """
         max_x = np.max(x)
@@ -62,11 +62,11 @@ class SoftMaxOp(BaseOp):
         """
         Compute the product of max hessian with z using the gradient p of max.
 
-        :param p: np.ndarray, shape = (p)
+        :param p: _numpy.ndarray, shape = (p)
             Gradient of max(x)
-        :param z: np.ndarray, shape = (p)
+        :param z: _numpy.ndarray, shape = (p)
             Vector to compute the Jacobian product with
-        :return: np.ndarray, shape = (p, p)
+        :return: _numpy.ndarray, shape = (p, p)
             Jacobian of argmax(x)
         """
         return p * z - p * np.sum(p * z)
@@ -82,9 +82,9 @@ class SparseMaxOp(BaseOp):
         """
         Solves max_{p \in \Delta^d} <x, p> - \frac{1}{2} \sum_{i=1}^d p_i^2.
 
-        :param x: np.ndarray, shape = (n,)
+        :param x: _numpy.ndarray, shape = (n,)
             Vector to project
-        :return: Tuple[float, np.ndarray]
+        :return: Tuple[float, _numpy.ndarray]
             max(x), argmax(x)
         """
         n_features = x.shape[0]
@@ -104,11 +104,11 @@ class SparseMaxOp(BaseOp):
         """
         Compute the product of max hessian with z using the gradient p of max.
 
-        :param p: np.ndarray, shape = (p)
+        :param p: _numpy.ndarray, shape = (p)
             Gradient of max(x)
-        :param z: np.ndarray, shape = (p)
+        :param z: _numpy.ndarray, shape = (p)
             Vector to compute the Jacobian product with
-        :return: np.ndarray, shape = (p, p)
+        :return: _numpy.ndarray, shape = (p, p)
             Jacobian of argmax(x)
         """
         s = p > 0
@@ -125,9 +125,9 @@ class HardMaxOp(BaseOp):
         """
         Solves max_{p \in \Delta^d} <x, p>
 
-        :param x: np.ndarray, shape = (n,)
+        :param x: _numpy.ndarray, shape = (n,)
             Vector to project
-        :return: Tuple[float, np.ndarray]
+        :return: Tuple[float, _numpy.ndarray]
             max(x), argmax(x)
         """
         i = np.argmax(x)
@@ -141,11 +141,11 @@ class HardMaxOp(BaseOp):
         """
         Compute the product of max hessian with z using the gradient p of max.
 
-        :param p: np.ndarray, shape = (p)
+        :param p: _numpy.ndarray, shape = (p)
             Gradient of max(x)
-        :param z: np.ndarray, shape = (p)
+        :param z: _numpy.ndarray, shape = (p)
             Vector to compute the Jacobian product with
-        :return: np.ndarray, shape = (p, p)
+        :return: _numpy.ndarray, shape = (p, p)
             Jacobian of argmax(x)
         """
         n_features = p.shape[0]

@@ -2,10 +2,10 @@ import numpy as np
 import pytest
 
 import torch
-from didypro.reference.autodiff.viterbi import ViterbiGrad, Viterbi
+from didypro.reference._autodiff.viterbi import ViterbiGrad, Viterbi
 
-from didypro.reference.np.tests.test_viterbi import make_data
-from didypro.reference.np.viterbi import viterbi_grad, viterbi_hessian_prod
+from didypro.reference._numpy.tests.test_viterbi import make_data
+from didypro.reference._numpy.viterbi import viterbi_grad, viterbi_hessian_prod
 
 
 @pytest.mark.parametrize("operator", ['hardmax', 'softmax', 'sparsemax'])
