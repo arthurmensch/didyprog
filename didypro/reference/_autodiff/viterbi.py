@@ -55,8 +55,8 @@ class ViterbiGrad(nn.Module):
         :return: y: torch.Tensor, shape=(T, B, S, S)
             Backtracking of the Viterbi loop for each sample
         """
-        nll = self.viterbi(theta)
         theta.requires_grad_()
+        nll = self.viterbi(theta)
         v = torch.sum(nll)
         v_grad, = grad(v, (theta,), create_graph=True)
         return v_grad

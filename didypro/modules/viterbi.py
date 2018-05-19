@@ -184,6 +184,19 @@ class PackedViterbi(nn.Module):
         return ViterbiFunction.apply(theta, batch_sizes, self.operator)
 
 
+class PackedViterbiGrad(nn.Module):
+    def __init__(self, operator):
+        super().__init__()
+        self.viterbi = PackedViterbi(operator)
+
+    def forward(self, theta, batch_sizes):
+        theta.requires_grad_()
+        nll = self.viterbi(theta, batch_sizes)
+        v = torch.sum(nll)
+        v_grad, = torch.autograd.grad(v, (theta,), create_graph=True)
+        return v_grad
+
+
 class Viterbi(nn.Module):
     def __init__(self, operator):
         super().__init__()
@@ -196,3 +209,16 @@ class Viterbi(nn.Module):
                 theta.shape[0])
         theta, batch_sizes = pack_padded_sequence(theta, lengths)
         return ViterbiFunction.apply(theta, batch_sizes, self.operator)
+
+
+class ViterbiGrad(nn.Module):
+    def __init__(self, operator):
+        super().__init__()
+        self.viterbi = Viterbi(operator)
+
+    def forward(self, theta, lengths=None):
+        theta.requires_grad_()
+        nll = self.viterbi(theta, lengths)
+        v = torch.sum(nll)
+        v_grad, = torch.autograd.grad(v, (theta,), create_graph=True)
+        return v_grad
