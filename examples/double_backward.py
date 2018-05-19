@@ -1,3 +1,10 @@
+"""
+Custom twice differentiable functions in Pytorch.
+
+Author: Arthur Mensch
+"""
+
+
 import torch
 
 import torch.nn as nn

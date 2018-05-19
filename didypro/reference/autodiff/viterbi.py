@@ -3,7 +3,7 @@ Pytorch modules for Viterbi and ViterbiGrad layers.
 """
 
 import torch
-from didypro.reference.pt.local import operators
+from didypro.reference.autodiff.local import operators
 
 from torch import nn
 from torch.autograd import grad

@@ -110,9 +110,8 @@ def dtw_hessian_prod(theta, Z, operator: str = 'hardmax')\
                           Q[i, j, 1] * V_dot[i - 1, j - 1] + \
                           Q[i, j, 2] * V_dot[i - 1, j]
 
-            H = operator.min_jacobian(Q[i, j])
-            v = [V_dot[i, j - 1], V_dot[i - 1, j - 1], V_dot[i - 1, j]]
-            Q_dot[i, j] = np.dot(H, v)
+            v = np.array([V_dot[i, j - 1], V_dot[i - 1, j - 1], V_dot[i - 1, j]])
+            Q_dot[i, j] = operator.min_hessian_product(Q[i, j], v)
     E_dot = np.zeros((m + 2, n + 2))
 
     for j in reversed(range(1, n + 1)):

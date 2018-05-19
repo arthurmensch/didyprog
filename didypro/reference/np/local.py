@@ -29,12 +29,12 @@ class BaseOp:
         return cls.max(x)[1]
 
     @staticmethod
-    def hessian_product(p: np.ndarray) -> np.ndarray:
+    def hessian_product(p: np.ndarray, z: np.ndarray) -> np.ndarray:
         raise NotImplementedError
 
     @classmethod
-    def min_jacobian(cls, p: np.ndarray) -> np.ndarray:
-        return - cls.hessian_product(p)
+    def min_hessian_product(cls, p: np.ndarray, z: np.ndarray) -> np.ndarray:
+        return - cls.hessian_product(p, z)
 
 
 class SoftMaxOp(BaseOp):
@@ -112,7 +112,7 @@ class SparseMaxOp(BaseOp):
             Jacobian of argmax(x)
         """
         s = p > 0
-        return s * z - s * (np.sum(s, z) / np.sum(s))
+        return s * z - s * (np.sum(s * z) / np.sum(s))
 
 
 class HardMaxOp(BaseOp):
