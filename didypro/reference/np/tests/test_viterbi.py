@@ -69,7 +69,7 @@ def make_data(T=20):
 
 @pytest.mark.parametrize("operator", ['hardmax', 'softmax', 'sparsemax'])
 def test_viterbi(operator):
-    states, emissions, theta = make_data()
+    states, emissions, theta = make_data(100)
     viterbi, grad, _, _ = viterbi_grad(theta, operator=operator)
     decoded = np.argmax(grad.sum(axis=2), axis=1)
     assert np.all(decoded == states)

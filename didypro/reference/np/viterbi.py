@@ -93,10 +93,9 @@ def viterbi_hessian_prod(theta: np.ndarray, Z: np.ndarray,
         for i in range(S):
             M = Z[t - 1, i] + Vdot[t - 1]
             Vdot[t, i] = np.sum(Q[t, i] * M)
-            H = operator.jacobian(Q[t, i])
-            Qdot[t, i] = H.dot(M)
+            Qdot[t, i] = operator.hessian_product(Q[t, i], M)
     vdot: float = np.sum(Q[T + 1, 0] * Vdot[T])
-    H = operator.jacobian(Q[T + 1, 0])
+    H = operator.hessian_product(Q[T + 1, 0])
     Qdot[T + 1, 0] = H.dot(Vdot[T])
     for t in reversed(range(0, T + 1)):
         Edot[t] = (Q[t + 1] * Udot[t + 1][:, None]

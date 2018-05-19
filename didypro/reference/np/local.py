@@ -29,12 +29,12 @@ class BaseOp:
         return cls.max(x)[1]
 
     @staticmethod
-    def jacobian(p: np.ndarray) -> np.ndarray:
+    def hessian_product(p: np.ndarray) -> np.ndarray:
         raise NotImplementedError
 
     @classmethod
     def min_jacobian(cls, p: np.ndarray) -> np.ndarray:
-        return - cls.jacobian(p)
+        return - cls.hessian_product(p)
 
 
 class SoftMaxOp(BaseOp):
@@ -58,16 +58,18 @@ class SoftMaxOp(BaseOp):
         return np.log(Z) + max_x, exp_x / Z
 
     @staticmethod
-    def jacobian(p: np.ndarray) -> np.ndarray:
+    def hessian_product(p: np.ndarray, z: np.ndarray) -> np.ndarray:
         """
-        Compute the Jacobian of argmax using the gradient of max.
+        Compute the product of max hessian with z using the gradient p of max.
 
         :param p: np.ndarray, shape = (p)
             Gradient of max(x)
+        :param z: np.ndarray, shape = (p)
+            Vector to compute the Jacobian product with
         :return: np.ndarray, shape = (p, p)
             Jacobian of argmax(x)
         """
-        return np.diag(p) - np.outer(p, p)
+        return p * z - p * np.sum(p * z)
 
 
 class SparseMaxOp(BaseOp):
@@ -98,17 +100,19 @@ class SparseMaxOp(BaseOp):
         return min_x, proj_x
 
     @staticmethod
-    def jacobian(p: np.ndarray) -> np.ndarray:
+    def hessian_product(p: np.ndarray, z: np.ndarray) -> np.ndarray:
         """
-        Compute the Jacobian of argmax using the gradient of max.
+        Compute the product of max hessian with z using the gradient p of max.
 
         :param p: np.ndarray, shape = (p)
             Gradient of max(x)
+        :param z: np.ndarray, shape = (p)
+            Vector to compute the Jacobian product with
         :return: np.ndarray, shape = (p, p)
             Jacobian of argmax(x)
         """
         s = p > 0
-        return np.diag(s) - np.outer(s, s) / np.sum(s)
+        return s * z - s * (np.sum(s, z) / np.sum(s))
 
 
 class HardMaxOp(BaseOp):
@@ -133,17 +137,19 @@ class HardMaxOp(BaseOp):
         return max_x, argmax_x
 
     @staticmethod
-    def jacobian(p: np.ndarray) -> np.ndarray:
+    def hessian_product(p: np.ndarray, z: np.ndarray) -> np.ndarray:
         """
-        Compute the Jacobian of argmax using the gradient of max.
+        Compute the product of max hessian with z using the gradient p of max.
 
         :param p: np.ndarray, shape = (p)
             Gradient of max(x)
+        :param z: np.ndarray, shape = (p)
+            Vector to compute the Jacobian product with
         :return: np.ndarray, shape = (p, p)
             Jacobian of argmax(x)
         """
         n_features = p.shape[0]
-        return np.zeros((n_features, n_features))
+        return np.zeros(n_features)
 
 
 operators = {'softmax': SoftMaxOp, 'sparsemax': SparseMaxOp,
