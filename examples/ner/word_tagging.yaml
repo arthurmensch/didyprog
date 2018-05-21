@@ -6,7 +6,6 @@ default:
     cache_dir: '~/cache'
     cuda: True
     seed: 0
-    restart_config_file: 'restart.yaml'
   n_samples: null
   language: 'en'
   hidden_dim: 100
@@ -14,7 +13,7 @@ default:
   letter_hidden_dim: 50
   pretrained_embeddings: 'fasttext'
   objective: 'nll'
-  pad_edge: False
+  pad_edge: True
   augment: False
   dropout: .5
   proc: 'lstm'
@@ -26,7 +25,6 @@ default:
   n_epochs: 80
   momentum: 0.
   lr: 0.01
-  state_dict_file: null
 ---
 grid:
     - language: ['en', 'nl', 'es', 'de']

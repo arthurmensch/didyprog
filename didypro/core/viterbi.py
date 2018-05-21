@@ -184,44 +184,34 @@ class PackedViterbi(nn.Module):
         return ViterbiFunction.apply(theta.data, theta.batch_sizes,
                                      self.operator)
 
-
-class PackedViterbiGrad(nn.Module):
-    def __init__(self, operator):
-        super().__init__()
-        self.viterbi = PackedViterbi(operator)
-
-    def forward(self, theta):
-        theta.requires_grad_()
-        nll = self.viterbi(theta)
-        v = torch.sum(nll)
-        v_grad, = torch.autograd.grad(v, (theta,), create_graph=True)
-        return v_grad
+    def decode(self, theta):
+        """Shortcut for doing inference
+        """
+        data, batch_sizes = theta
+        with torch.enable_grad():
+            data.requires_grad_()
+            nll = self.forward(theta)
+            v = torch.sum(nll)
+            v_grad, = torch.autograd.grad(v, (data,), create_graph=True)
+        return PackedSequence(v_grad, batch_sizes)
 
 
 class Viterbi(nn.Module):
     def __init__(self, operator):
         super().__init__()
-        self.operator = operator
+        self.packed_viterbi = PackedViterbi(operator=operator)
 
-    def forward(self, theta, lengths=None):
+    def _pack(self, theta, lengths):
         T, B, S, _ = theta.shape
         if lengths is None:
             data = theta.view(T * B, S, S)
             batch_sizes = torch.LongTensor(T, device=theta.device).fill_(B)
         else:
             data, batch_sizes = pack_padded_sequence(theta, lengths)
-        return ViterbiFunction.apply(data, batch_sizes,
-                                     self.operator)
-
-
-class ViterbiGrad(nn.Module):
-    def __init__(self, operator):
-        super().__init__()
-        self.viterbi = Viterbi(operator)
+        return PackedSequence(data, batch_sizes)
 
     def forward(self, theta, lengths=None):
-        theta.requires_grad_()
-        nll = self.viterbi(theta, lengths)
-        v = torch.sum(nll)
-        v_grad, = torch.autograd.grad(v, (theta,), create_graph=True)
-        return v_grad
+        return self.packed_viterbi(self._pack(theta, lengths))
+
+    def decode(self, theta, lengths=None):
+        return self.packed_viterbi.decode(self._pack(theta, lengths))

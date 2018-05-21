@@ -215,6 +215,7 @@ class Tagger(nn.Module):
                  proc='lstm',
                  dropout=True,
                  alpha=1, operator='softmax',
+                 eos_idx=None, init_idx=None,
                  letter_embedding_dim=None, letter_size=None,
                  letter_hidden_dim=None):
         super(Tagger, self).__init__()
@@ -243,7 +244,9 @@ class Tagger(nn.Module):
 
         self.alpha = alpha
 
-        self.linear_potential = LinearPotential(hidden_dim, tagset_size)
+        self.linear_potential = LinearPotential(hidden_dim, tagset_size,
+                                                eos_idx=eos_idx,
+                                                init_idx=init_idx)
         self.viterbi = PackedViterbi(operator=operator)
 
     def reset_parameters(self):
@@ -277,7 +280,7 @@ class Tagger(nn.Module):
                                                        letters_lengths,
                                                        sorted=sorted)
 
-        scores = self.viterbi.grad(potentials)
+        scores = self.viterbi.decode(potentials)
         scores, _ = pad_packed_sequence(scores, batch_first=True)
         if not sorted:
             scores = scores[rev_indices]

@@ -1,12 +1,11 @@
-import functools
-import os
-import random
-import re
-import signal
 import time
 from collections import Counter
 from math import floor
 
+import functools
+import os
+import random
+import re
 import torch
 import torchtext.data as ttdata
 import yaml
@@ -43,17 +42,18 @@ def validate(model, data_iter, score_function, objective, loss_function,
     all_pred_tags = []
     total_loss = 0
     total_samples = 0
-    for batch in data_iter:
-        data = make_data(batch)
-        sentences, tags, lengths, letters, letters_lengths = data
-        pred_tags = model(sentences, lengths, letters, letters_lengths,
-                          sorted=True)
-        loss = compute_loss(model, data, objective, loss_function)
-        total_loss += loss * len(sentences)
-        total_samples += len(sentences)
-        for tag, pred_tag, length in zip(tags, pred_tags, lengths):
-            all_tags.append(tag.cpu())
-            all_pred_tags.append(pred_tag.cpu())
+    with torch.no_grad():
+        for batch in data_iter:
+            data = make_data(batch)
+            sentences, tags, lengths, letters, letters_lengths = data
+            pred_tags = model(sentences, lengths, letters, letters_lengths,
+                              sorted=True)
+            loss = compute_loss(model, data, objective, loss_function)
+            total_loss += loss * len(sentences)
+            total_samples += len(sentences)
+            for tag, pred_tag, length in zip(tags, pred_tags, lengths):
+                all_tags.append(tag.cpu().numpy())
+                all_pred_tags.append(pred_tag.cpu().numpy())
     loss = total_loss / total_samples
     prec, recall, f1 = score_function(all_tags, all_pred_tags)
     return loss, prec, recall, f1
@@ -80,7 +80,7 @@ def compute_loss(model, data, objective, loss_function):
 
 
 @exp.capture(prefix='system')
-def init_system(exp_dir, temp_dir, cache_dir, restart_config_file,
+def init_system(exp_dir, temp_dir, cache_dir,
                 cuda, _seed, _log, _run):
     exp_dir = expanduser(exp_dir)
     temp_dir = expanduser(temp_dir)
@@ -90,8 +90,6 @@ def init_system(exp_dir, temp_dir, cache_dir, restart_config_file,
         if not os.path.exists(this_dir):
             os.makedirs(this_dir)
     _run.info['artifact_dir'] = artifact_dir
-    with open(restart_config_file, 'w+') as f:
-        yaml.dump(config, f)
 
     torch.manual_seed(_seed)
     random.seed(_seed)
@@ -318,9 +316,11 @@ def main(language, hidden_dim,
                    letter_hidden_dim=letter_hidden_dim,
                    letter_size=letter_size,
                    dropout=dropout,
+                   eos_idx=eos_idx, init_idx=init_idx,
                    alpha=alpha,
                    operator=operator)
 
+    # Load vectors
     if hasattr(sentences.vocab, 'vectors'):
         model.embedder.word_embeddings.weight.data = sentences.vocab.vectors
         model.embedder.word_embeddings.weight.data[padding_idx].fill_(0.)
