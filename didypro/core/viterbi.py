@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence, PackedSequence
 
-from didypro.modules.local import operators
+from didypro.core.local import operators
 
 
 def _topological_loop(theta, batch_sizes, operator='softmax', adjoint=False,

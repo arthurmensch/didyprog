@@ -1,5 +1,5 @@
 """
-Pytorch modules for Viterbi and ViterbiGrad layers.
+Pytorch core for Viterbi and ViterbiGrad layers.
 """
 
 import torch

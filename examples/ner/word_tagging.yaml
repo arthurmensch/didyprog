@@ -1,0 +1,59 @@
+---
+default:
+  system:
+    exp_dir: '~/output/sdtw/word_tagging'
+    temp_dir: '~/temp'
+    cache_dir: '~/cache'
+    cuda: True
+    seed: 0
+    restart_config_file: 'restart.yaml'
+  n_samples: null
+  language: 'en'
+  hidden_dim: 100
+  letter_embedding_dim: 25
+  letter_hidden_dim: 50
+  pretrained_embeddings: 'fasttext'
+  objective: 'nll'
+  pad_edge: False
+  augment: False
+  dropout: .5
+  proc: 'lstm'
+  letter_proc: 'lstm'
+  operator: 'softmax'
+  alpha: 5
+  optimizer: 'sgd'
+  batch_size: 8
+  n_epochs: 80
+  momentum: 0.
+  lr: 0.01
+  state_dict_file: null
+---
+grid:
+    - language: ['en', 'nl', 'es', 'de']
+      operator: 'softmax'
+      objective: 'nll'
+#  language: 'en'
+#  operator: 'entropy'
+#  batch_size: 128
+#  objective: ['nll', 'erm']
+#  grid:
+#    - optimizer: 'sgd'
+#      lr: 0.01
+#    - optimizer: 'adam'
+#      lr: 0.001
+#  language: ['en', 'nl', 'es', 'de']
+#      lr: 0.1
+#    - lr: 0.01
+#      optimizer: 'sgd'
+#      objective: 'surr_nll'
+#      grid:
+#        - operator: 'entropy'
+#          alpha: 1
+#        - operator: 'l2'
+#          alpha: 5
+#  - language: 'en'
+#    operator: 'entropy'
+#    objective: ['erm', 'nll']
+#    batch_size: [8, 128]
+#    lr: [0.01, 0.1]
+---
