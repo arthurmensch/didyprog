@@ -24,6 +24,7 @@ class LinearPotential(torch.nn.Module):
 
     def forward(self, X):
         n_states = self.transition.shape[0]
+        batch_size = X.shape[0]
         unary_potentials = (torch.matmul(X, self.weight[None, :, :])
                             + self.bias[None, None, :])
         potentials = (unary_potentials[:, :, :, None]

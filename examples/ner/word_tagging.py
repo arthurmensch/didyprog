@@ -9,19 +9,18 @@ import re
 import torch
 import torchtext.data as ttdata
 import yaml
-from os.path import expanduser, join
-from sacred import Experiment
-from sacred.observers import FileStorageObserver
-from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torchtext.data import Iterator
-from torchtext.vocab import Vocab, GloVe, FastText
-
 from didypro.externals.sacred import lazy_add_artifact
 from didypro.externals.torchtext.data import SequenceTaggingDataset, \
     NestedField, CaseInsensitiveVectors
 from didypro.tagger.evaluation import ner_score, iob1_iobes
 from didypro.tagger.loss import BinaryMSELoss, OurNLLLoss
 from didypro.tagger.model import Tagger
+from os.path import expanduser, join
+from sacred import Experiment
+from sacred.observers import FileStorageObserver
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torchtext.data import Iterator
+from torchtext.vocab import Vocab, GloVe, FastText
 
 exp_name = 'word_tagging'
 exp = Experiment(name=exp_name)
@@ -368,7 +367,6 @@ def main(language, hidden_dim,
             _log.info("epoch %i, time/epoch %.3f s" % (epoch, elapsed))
             if epoch % 10 == 0:
                 dump_model(model, 'model_%i.pt' % epoch)
-                print(model.linear_potential.transition)
             for fold in eval_iter:
                 this_iter = eval_iter[fold]
                 this_iter = iter(this_iter)
