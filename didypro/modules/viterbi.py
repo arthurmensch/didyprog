@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.nn.utils.rnn import pack_padded_sequence
+from torch.nn.utils.rnn import pack_padded_sequence, PackedSequence
 
 from didypro.modules.local import operators
 
@@ -78,11 +78,11 @@ def _reverse_loop(Q, Qt, Ut, batch_sizes, adjoint=False,
     L = L - B
 
     if adjoint:
-        Ed = new(L + B, S, S).zero_()
+        Ed = new(L, S, S).zero_()
         Ud = new(L + B, S).zero_()
         Udt = new(B).zero_()
     else:
-        E = new(L + B, S, S).zero_()
+        E = new(L, S, S).zero_()
         U = new(L + B, S).zero_()
         # Ut = Ut
 
@@ -180,8 +180,9 @@ class PackedViterbi(nn.Module):
         super().__init__()
         self.operator = operator
 
-    def forward(self, theta, batch_sizes):
-        return ViterbiFunction.apply(theta, batch_sizes, self.operator)
+    def forward(self, theta):
+        return ViterbiFunction.apply(theta.data, theta.batch_sizes,
+                                     self.operator)
 
 
 class PackedViterbiGrad(nn.Module):
@@ -189,9 +190,9 @@ class PackedViterbiGrad(nn.Module):
         super().__init__()
         self.viterbi = PackedViterbi(operator)
 
-    def forward(self, theta, batch_sizes):
+    def forward(self, theta):
         theta.requires_grad_()
-        nll = self.viterbi(theta, batch_sizes)
+        nll = self.viterbi(theta)
         v = torch.sum(nll)
         v_grad, = torch.autograd.grad(v, (theta,), create_graph=True)
         return v_grad
@@ -203,12 +204,14 @@ class Viterbi(nn.Module):
         self.operator = operator
 
     def forward(self, theta, lengths=None):
+        T, B, S, _ = theta.shape
         if lengths is None:
-            lengths = torch.LongTensor(theta.shape[1],
-                                       device=theta.device).fill_(
-                theta.shape[0])
-        theta, batch_sizes = pack_padded_sequence(theta, lengths)
-        return ViterbiFunction.apply(theta, batch_sizes, self.operator)
+            data = theta.view(T * B, S, S)
+            batch_sizes = torch.LongTensor(T, device=theta.device).fill_(B)
+        else:
+            data, batch_sizes = pack_padded_sequence(theta, lengths)
+        return ViterbiFunction.apply(data, batch_sizes,
+                                     self.operator)
 
 
 class ViterbiGrad(nn.Module):
