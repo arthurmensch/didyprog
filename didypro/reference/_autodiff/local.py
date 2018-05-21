@@ -48,6 +48,7 @@ def sparsemax(X):
                        index=rho[:, None] - 1)[:, 0] / rho.type(X.type())
     tau = tau.view(seq_len, n_batch)
     A = torch.clamp(X - tau[:, :, None], min=0)
+    A /= A.sum(dim=2, keepdim=True)
 
     M = torch.sum(A * (X - .5 * A), dim=2)
     return M

@@ -17,10 +17,10 @@ def test_packed_viterbi(operator):
     theta = theta[:, None, :, :]
     theta = theta.repeat((1, 2, 1, 1))
     theta.requires_grad_()
-    W, batch_sizes = pack_padded_sequence(theta, [10, 10])
+    W = pack_padded_sequence(theta, [10, 10])
 
     viterbi = PackedViterbi(operator)
-    v = viterbi(W, batch_sizes)
+    v = viterbi(W)
     s = v.sum()
     s.backward()
     decoded = torch.argmax(theta.grad[:, 0].sum(dim=2), dim=1).numpy()
