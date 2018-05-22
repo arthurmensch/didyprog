@@ -14,12 +14,12 @@ default:
   pretrained_embeddings: 'fasttext'
   objective: 'nll'
   pad_edge: True
-  augment: False
+  augment: True
   dropout: .5
   proc: 'lstm'
   letter_proc: 'lstm'
   operator: 'softmax'
-  alpha: 5
+  alpha: 1
   optimizer: 'sgd'
   batch_size: 8
   n_epochs: 80

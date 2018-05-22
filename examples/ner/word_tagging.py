@@ -137,9 +137,9 @@ def make_data(batch, augment=False,
     # Data augmentation for <unk> embedding training
     if augment:
         indices = torch.zeros_like(tags)
-        bernoulli = torch.FloatTensor(*tags.shape,
-                                      device=indices.device).fill_(.3)
+        bernoulli = torch.FloatTensor(*tags.shape,).fill_(.3)
         bernoulli = torch.bernoulli(bernoulli).byte()
+        bernoulli = bernoulli.to(tags.device)
         indices = indices.byte()
         for rep in singleton_idx:
             indices = indices | (tags == rep)

@@ -34,6 +34,14 @@ class Viterbi(nn.Module):
         v = self.operator(V[:, None, :])[:, 0]
         return v
 
+    def decode(self, theta):
+        with torch.enable_grad():
+            theta.requires_grad_()
+            nll = self.forward(theta)
+            v = torch.sum(nll)
+            theta_grad, = torch.autograd.grad(v, (theta,), create_graph=True)
+        return theta_grad
+
 
 class ViterbiGrad(nn.Module):
     """
