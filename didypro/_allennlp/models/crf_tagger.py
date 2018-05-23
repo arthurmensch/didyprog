@@ -7,14 +7,17 @@ from torch.nn.modules.linear import Linear
 from allennlp.common import Params
 from allennlp.common.checks import check_dimensions_match
 from allennlp.data import Vocabulary
-from allennlp.modules import Seq2SeqEncoder, TimeDistributed, TextFieldEmbedder, ConditionalRandomField
+from allennlp.modules import Seq2SeqEncoder, TimeDistributed, TextFieldEmbedder
 from allennlp.modules.conditional_random_field import allowed_transitions
 from allennlp.models.model import Model
 from allennlp.nn import InitializerApplicator, RegularizerApplicator
 import allennlp.nn.util as util
 from allennlp.training.metrics import SpanBasedF1Measure
 
-@Model.register("didy_tagger")
+from ..modules import ConditionalRandomField
+
+
+@Model.register("didypro_tagger")
 class CrfTagger(Model):
     """
     The ``CrfTagger`` encodes a sequence of text with a ``Seq2SeqEncoder``,

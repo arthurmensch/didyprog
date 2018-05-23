@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from didypro.reference._numpy.dtw import dtw_value, dtw_grad, dtw_hessian_prod
+from didypro.reference.dtw import dtw_value, dtw_grad, dtw_hessian_prod
 from scipy.optimize import check_grad
 from sklearn.metrics.pairwise import pairwise_distances
 

@@ -2,10 +2,10 @@ import numpy as np
 import pytest
 
 import torch
-from didypro.reference._autodiff.viterbi import ViterbiGrad, Viterbi
+from didypro._allennlp.modules.viterbi import Viterbi
 
-from didypro.reference._numpy.tests.test_viterbi import make_data
-from didypro.reference._numpy.viterbi import viterbi_grad, viterbi_hessian_prod
+from didypro.reference.tests import make_data
+from didypro.reference.viterbi import viterbi_grad, viterbi_hessian_prod
 
 
 @pytest.mark.parametrize("operator", ['hardmax', 'softmax', 'sparsemax'])
@@ -41,8 +41,8 @@ def test_viterbi_grad(operator):
     Z = torch.from_numpy(Z[:, None, :, :])
     theta = torch.from_numpy(theta[:, None, :, :])
     theta.requires_grad_()
-    viterbi_grad = ViterbiGrad(operator)
-    v_grad = viterbi_grad(theta)
+    viterbi = Viterbi(operator)
+    v_grad = viterbi.decode(theta)
 
     v_h = torch.sum(Z * v_grad)
     v_h.backward()

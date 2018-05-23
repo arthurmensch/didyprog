@@ -5,8 +5,8 @@ from torch.autograd import gradcheck
 from torch.autograd.gradcheck import gradgradcheck
 from torch.nn.utils.rnn import pack_padded_sequence, pad_sequence
 
-from didypro.core.viterbi import Viterbi, PackedViterbi
-from didypro.reference._numpy.tests.test_viterbi import make_data
+from didypro.ner.viterbi import Viterbi, PackedViterbi
+from didypro.reference._numpy.tests import make_data
 
 
 @pytest.mark.parametrize("operator", ['hardmax', 'softmax', 'sparsemax'])

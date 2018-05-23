@@ -9,12 +9,12 @@ import re
 import torch
 import torchtext.data as ttdata
 import yaml
-from didypro.externals.sacred import lazy_add_artifact
-from didypro.externals.torchtext.data import SequenceTaggingDataset, \
+from didypro.ner.externals.sacred import lazy_add_artifact
+from didypro.ner.externals.torchtext.data import SequenceTaggingDataset, \
     NestedField, CaseInsensitiveVectors
-from didypro.tagger.evaluation import ner_score, iob1_iobes
-from didypro.tagger.loss import BinaryMSELoss, OurNLLLoss
-from didypro.tagger.model import Tagger
+from didypro.ner.evaluation import ner_score, iob1_iobes
+from didypro.ner.loss import BinaryMSELoss, OurNLLLoss
+from didypro.ner.model import Tagger
 from os.path import expanduser, join
 from sacred import Experiment
 from sacred.observers import FileStorageObserver
@@ -241,9 +241,9 @@ def main(language, hidden_dim,
         sentences.build_vocab(train_data, val_data, test_data)
         embedding_dim = pretrained_embeddings
     else:
-        if pretrained_embeddings == 'tagger':
+        if pretrained_embeddings == 'ner':
             vectors = CaseInsensitiveVectors(
-                expanduser('~/data/sdtw_data/tagger/%s' %
+                expanduser('~/data/sdtw_data/ner/%s' %
                            tagger_languages[language]),
                 unk_init=lambda x: x.normal_(0, 1),
                 cache=expanduser('~/cache'))

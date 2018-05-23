@@ -1,4 +1,43 @@
+"""
+Viterbi and Viterbi inference with autograd.
+"""
+
 import torch
+from torch.autograd import Variable
+
+
+def viterbi(theta: torch.Tensor,
+            mask: torch.Tensor = None,
+            operator: str = 'softmax') -> torch.Tensor:
+    """
+
+    :param theta: torch.Tensor, shape=(T, B, S, S)
+        Potential tensor on which to apply the Viterbi alg.
+    :param mask:
+    :param operator:
+    :return: values: torch.Tensor, shape=(B)
+        Output of the Viterbi loop for each sample
+    """
+    operator = operators[operator]
+    T, B, S, _ = theta.shape
+    V = Variable(theta.data.new(B, S).zero_())
+    if mask is None:
+        mask = Variable(theta.data.new(T, B).fill_(1.))
+    for t in range(0, T):
+        V = (mask[t][:, None] * operator(theta[t] + V[:, None, :])
+             + (1 - mask[t])[:, None] * V)
+    v = operator(V[:, None, :])[:, 0]
+    return v
+
+
+def viterbi_decode(theta, mask: torch.Tensor = None,
+                   operator: str = 'hardmax'):
+    theta = theta.detach()
+    theta.requires_grad = True
+    nll = viterbi(theta, mask, operator=operator)
+    v = torch.sum(nll)
+    theta_grad, = torch.autograd.grad(v, (theta,), create_graph=True)
+    return theta_grad
 
 
 def softmax(X):

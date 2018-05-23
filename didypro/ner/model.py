@@ -3,8 +3,8 @@ import torch.nn.functional as F
 from torch import nn
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
-from didypro.core.viterbi import PackedViterbi
-from didypro.tagger.potential import LinearPotential
+from didypro.ner.viterbi import PackedViterbi
+from didypro.ner.potential import LinearPotential
 
 
 class GatedCNNProcessor(nn.Module):
