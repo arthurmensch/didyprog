@@ -124,56 +124,37 @@ class ConditionalRandomField(torch.nn.Module):
                                         + end_transitions[None, :, None])
         return potentials
 
-    def _input_likelihood(self, logits: torch.Tensor,
+    def _input_likelihood(self, potentials: torch.Tensor,
                           mask: torch.Tensor) -> torch.Tensor:
         """
         Computes the (batch_size,) denominator term for the log-likelihood,
         which is the sum of the likelihoods across all possible state sequences.
         """
-        logits = logits.transpose(0, 1).contiguous()
-        mask = mask.transpose(0, 1).contiguous()
-
-        potentials = self._make_potentials(logits, mask, constrained=False)
-
         mask = mask.float()
         return viterbi(potentials, mask)
 
     def _joint_likelihood(self,
-                          logits: torch.Tensor,
+                          potentials: torch.Tensor,
                           tags: torch.Tensor,
                           mask: torch.LongTensor) -> torch.Tensor:
         """
         Computes the numerator term for the log-likelihood, which is just score(inputs, tags)
         """
-        batch_size, sequence_length, num_tags = logits.data.shape
 
-        # Transpose batch size and sequence dimensions:
-        logits = logits.transpose(0, 1).contiguous()
-        mask = mask.transpose(0, 1).contiguous()
-
-        potentials = self._make_potentials(logits, mask, constrained=False)
-
-        tags = tags.transpose(0, 1).data
+        tags = tags.data
         mask = mask.data.byte()
         path = torch.zeros(potentials.shape).byte()
+
+        sequence_length, batch_size = tags.shape
 
         for b in range(batch_size):
             path[0, b, tags[0, b], 0] = 1
             for t in range(1, sequence_length):
                 path[t, b, tags[t, b], tags[t - 1, b]] = mask[t, b]
 
-        # for t in range(sequence_length):
-        #     if t > 0:
-        #         last_tags = tags[t - 1].tolist()
-        #     else:
-        #         last_tags = [0] * batch_size
-        #     indices = [[t] * batch_size, list(range(batch_size)),
-        #                tags[t].tolist(), last_tags]
-        #     potential_selector[indices] = mask[t]
         return torch.sum(torch.masked_select(potentials, Variable(path)))
 
-    def forward(self,
-                inputs: torch.Tensor,
+    def forward(self, inputs: torch.Tensor,
                 tags: torch.Tensor,
                 mask: torch.ByteTensor = None) -> torch.Tensor:
         """
@@ -182,11 +163,17 @@ class ConditionalRandomField(torch.nn.Module):
         # pylint: disable=arguments-differ
         if mask is None:
             mask = torch.autograd.Variable(torch.ones(*tags.size()).long())
+        # Transpose batch size and sequence dimensions:
+        logits = inputs.transpose(0, 1).contiguous()
+        mask = mask.transpose(0, 1).contiguous()
+        tags = tags.transpose(0, 1)
 
-        log_denominator = self._input_likelihood(inputs, mask)
-        log_numerator = self._joint_likelihood(inputs, tags, mask)
+        potentials = self._make_potentials(logits, mask, constrained=False)
 
-        return torch.sum(log_numerator - log_denominator)
+        log_denominator = self._input_likelihood(potentials, mask)
+        log_numerator = self._joint_likelihood(potentials, tags, mask)
+
+        return log_numerator - torch.sum(log_denominator)
 
     def viterbi_tags(self, logits: Variable, mask: Variable) -> List[
         List[int]]:

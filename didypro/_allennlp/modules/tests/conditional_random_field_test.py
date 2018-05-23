@@ -34,8 +34,6 @@ class TestConditionalRandomField(AllenNlpTestCase):
 
         self.transitions_from_start = torch.Tensor([0.1, 0.2, 0.3, 0.4, 0.6])
         self.transitions_to_end = torch.Tensor([-0.1, -0.2, 0.3, -0.4, -0.4])
-        # self.transitions_to_end = torch.Tensor([-0.1, -0.2, 0.3, -0.4, -0.4])
-        # self.transitions_to_end = torch.Tensor([-0.1, -0.2, 0.3, -0.4, -0.4])
 
 
         # Use the CRF Module with fixed transitions to compute the log_likelihood
@@ -54,6 +52,7 @@ class TestConditionalRandomField(AllenNlpTestCase):
         # Add in all the intermediate transitions
         for tag, next_tag in zip(tags, tags[1:]):
             total += self.transitions[tag, next_tag]
+            # print(self.transitions[tag, next_tag])
         # Add in the logits for the observed tags
         for logit, tag in zip(logits, tags):
             total += logit[tag]

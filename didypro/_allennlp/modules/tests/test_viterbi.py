@@ -2,9 +2,9 @@ import numpy as np
 import pytest
 
 import torch
-from didypro._allennlp.modules.viterbi import Viterbi
+from didypro._allennlp.modules.viterbi import viterbi, viterbi_decode
 
-from didypro.reference.tests import make_data
+from didypro.reference.tests.test_viterbi import make_data
 from didypro.reference.viterbi import viterbi_grad, viterbi_hessian_prod
 
 
@@ -15,8 +15,7 @@ def test_viterbi(operator):
 
     theta = torch.from_numpy(theta[:, None, :, :])
     theta.requires_grad_()
-    viterbi = Viterbi(operator)
-    nll = viterbi(theta)
+    nll = viterbi(theta, operator=operator)
     nll = nll.sum()
 
     np.testing.assert_almost_equal(nll.item(), nll_ref)
@@ -41,8 +40,7 @@ def test_viterbi_grad(operator):
     Z = torch.from_numpy(Z[:, None, :, :])
     theta = torch.from_numpy(theta[:, None, :, :])
     theta.requires_grad_()
-    viterbi = Viterbi(operator)
-    v_grad = viterbi.decode(theta)
+    v_grad = viterbi_decode(theta, operator=operator)
 
     v_h = torch.sum(Z * v_grad)
     v_h.backward()
