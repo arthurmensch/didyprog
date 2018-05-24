@@ -9,18 +9,20 @@ import re
 import torch
 import torchtext.data as ttdata
 import yaml
-from didypro.ner.externals.sacred import lazy_add_artifact
-from didypro.ner.externals.torchtext.data import SequenceTaggingDataset, \
-    NestedField, CaseInsensitiveVectors
-from didypro.ner.evaluation import ner_score, iob1_iobes
-from didypro.ner.loss import BinaryMSELoss, OurNLLLoss
-from didypro.ner.model import Tagger
+
 from os.path import expanduser, join
 from sacred import Experiment
 from sacred.observers import FileStorageObserver
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchtext.data import Iterator
 from torchtext.vocab import Vocab, GloVe, FastText
+
+from didypro.ner.evaluation import ner_score, iob1_iobes
+from didypro.ner.externals.sacred import lazy_add_artifact
+from didypro.ner.externals.torchtext.data import SequenceTaggingDataset, \
+    NestedField, CaseInsensitiveVectors
+from didypro.ner.loss import BinaryMSELoss, OurNLLLoss
+from didypro.ner.model import Tagger
 
 exp_name = 'word_tagging'
 exp = Experiment(name=exp_name)

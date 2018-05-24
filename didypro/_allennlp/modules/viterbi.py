@@ -32,8 +32,8 @@ def viterbi(theta: torch.Tensor,
 
 def viterbi_decode(theta, mask: torch.Tensor = None,
                    operator: str = 'hardmax'):
-    theta = theta.detach()
-    theta.requires_grad = True
+    # theta = theta.detach()
+    # theta.requires_grad = True
     nll = viterbi(theta, mask, operator=operator)
     v = torch.sum(nll)
     theta_grad, = torch.autograd.grad(v, (theta,), create_graph=True)

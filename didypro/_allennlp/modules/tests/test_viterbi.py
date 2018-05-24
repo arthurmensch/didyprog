@@ -4,7 +4,7 @@ import pytest
 import torch
 from didypro._allennlp.modules.viterbi import viterbi, viterbi_decode
 
-from didypro.reference.tests.test_viterbi import make_data
+from didypro.utils import make_data
 from didypro.reference.viterbi import viterbi_grad, viterbi_hessian_prod
 
 

@@ -30,9 +30,7 @@ def _topological_loop(theta, mask, operator='softmax', adjoint=False,
                                             + V[:, t - 1][:, None, :])
             V[:, t] = (V[:, t] * mask[:, t][:, None] +
                        (1 - mask[:, t][:, None]) * V[:, t - 1])
-            Q[:, t] = (Q[:, t] * mask[:, t][:, None, None] +
-                       (1 - mask[:, t][:, None, None])
-                       * torch.eye(S, device=Q.device))
+            Q[:, t] = Q[:, t] * mask[:, t][:, None, None]
     if adjoint:
         v, Q[:, T + 1, 0] = operator.max(V[:, T][:, None, :])
     else:
@@ -46,7 +44,7 @@ def _topological_loop(theta, mask, operator='softmax', adjoint=False,
         return v, Q
 
 
-def _reverse_loop(Q, M=None, adjoint=False, U=None, Qd=None):
+def _reverse_loop(Q, mask, M=None, adjoint=False, U=None, Qd=None):
     new = Q.new
     B, T, S, _ = Q.size()
     T = T - 2
@@ -60,12 +58,13 @@ def _reverse_loop(Q, M=None, adjoint=False, U=None, Qd=None):
 
     for t in reversed(range(0, T + 1)):
         if adjoint:
-            Ed[t] = (Q[t + 1] * Ud[t + 1][:, None]
-                     + Qd[t + 1] * U[t + 1][:, None])
+            Ed[:, t] = (Q[t + 1] * Ud[t + 1][:, None]
+                        + Qd[t + 1] * U[t + 1][:, None]) * mask[:, t][:, None, None]
             Ud[:, t] = torch.sum(Ed[:, t], dim=0)
         else:
             E[:, t] = Q[:, t + 1] * U[:, t + 1][:, None]
-            U[:, t] = torch.sum(E[:, t], dim=0)
+            U[:, t] = (torch.sum(E[:, t], dim=0) * mask[:, t][:, None]
+                       + (1 - mask[:, t][:, None]) * U[:, t + 1])
     if adjoint:
         return E, U
     else:
