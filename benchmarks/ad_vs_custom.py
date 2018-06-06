@@ -1,17 +1,18 @@
 import time
 
+import functools
 import torch
 from didypro.ner.potential import LinearPotential
 from didypro.ner.viterbi import Viterbi
-from didypro._allennlp.modules.viterbi import Viterbi as ViterbiAD
+from didypro._allennlp.modules.viterbi import viterbi as viterbi_ad
 
 torch.manual_seed(0)
 torch.cuda.manual_seed_all(0)
 
 
 length = 100
-batch_size = 256
-n_targets = 32
+batch_size = 32
+n_targets = 16
 n_features = 100
 n_trials = 1
 gpu = True
@@ -19,8 +20,9 @@ operator = 'sparsemax'
 
 X = torch.FloatTensor(length, batch_size, n_features).uniform_()
 
-viterbi_ad = ViterbiAD(operator=operator)
 viterbi = Viterbi(operator=operator)
+viterbi_ad = functools.partial(viterbi_ad, operator=operator)
+
 linear_potential = LinearPotential(n_features, n_targets)
 theta_ = linear_potential(X)
 
