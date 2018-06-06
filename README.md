@@ -1,2 +1,2 @@
-# didypro
+# didyprog
 Differentiable Dynamic Programming
