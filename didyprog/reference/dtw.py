@@ -1,6 +1,6 @@
 import numpy as np
 
-from didypro.reference.local import operators
+from didyprog.reference.local import operators
 from typing import Tuple
 
 

@@ -2,7 +2,7 @@
 Conditional random field
 """
 import torch
-from didypro._allennlp.modules.viterbi import viterbi, viterbi_decode
+from didyprog._allennlp.modules.viterbi import viterbi, viterbi_decode
 from torch.autograd import Variable
 from typing import List, Tuple
 

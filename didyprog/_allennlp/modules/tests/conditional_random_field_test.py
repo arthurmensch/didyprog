@@ -6,7 +6,7 @@ from pytest import approx, raises
 import torch
 from torch.autograd import Variable
 
-from didypro._allennlp.modules.conditional_random_field import ConditionalRandomField
+from didyprog._allennlp.modules.conditional_random_field import ConditionalRandomField
 from allennlp.modules.conditional_random_field import allowed_transitions
 from allennlp.common.checks import ConfigurationError
 from allennlp.common.testing import AllenNlpTestCase

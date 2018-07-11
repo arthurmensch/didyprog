@@ -2,10 +2,10 @@ import numpy as np
 import pytest
 
 import torch
-from didypro._allennlp.modules.viterbi import viterbi, viterbi_decode
+from didyprog._allennlp.modules.viterbi import viterbi, viterbi_decode
 
-from didypro.utils import make_data
-from didypro.reference.viterbi import viterbi_grad, viterbi_hessian_prod
+from didyprog.utils import make_data
+from didyprog.reference.viterbi import viterbi_grad, viterbi_hessian_prod
 
 
 @pytest.mark.parametrize("operator", ['hardmax', 'softmax', 'sparsemax'])

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from didypro.ner.core.local import operators
+from didyprog.ner.core.local import operators
 
 
 def _topological_loop(theta, mask, operator='softmax', adjoint=False,

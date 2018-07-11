@@ -17,12 +17,12 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchtext.data import Iterator
 from torchtext.vocab import Vocab, GloVe, FastText
 
-from didypro.ner.evaluation import ner_score, iob1_iobes
-from didypro.ner.externals.sacred import lazy_add_artifact
-from didypro.ner.externals.torchtext.data import SequenceTaggingDataset, \
+from didyprog.ner.evaluation import ner_score, iob1_iobes
+from didyprog.ner.externals.sacred import lazy_add_artifact
+from didyprog.ner.externals.torchtext.data import SequenceTaggingDataset, \
     NestedField, CaseInsensitiveVectors
-from didypro.ner.loss import BinaryMSELoss, OurNLLLoss
-from didypro.ner.model import Tagger
+from didyprog.ner.loss import BinaryMSELoss, OurNLLLoss
+from didyprog.ner.model import Tagger
 
 exp_name = 'word_tagging'
 exp = Experiment(name=exp_name)

@@ -1,6 +1,6 @@
 import torch
-from didypro.ner.potential import LinearPotential
-from didypro.ner.viterbi import Viterbi
+from didyprog.ner.potential import LinearPotential
+from didyprog.ner.viterbi import Viterbi
 
 torch.manual_seed(0)
 torch.cuda.manual_seed_all(0)

@@ -1,6 +1,6 @@
 import numpy as np
 
-from didypro.reference.local import HardMaxOp, SparseMaxOp, SoftMaxOp
+from didyprog.reference.local import HardMaxOp, SparseMaxOp, SoftMaxOp
 
 
 def make_data():

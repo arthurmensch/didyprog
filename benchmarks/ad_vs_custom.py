@@ -2,9 +2,9 @@ import time
 
 import functools
 import torch
-from didypro.ner.potential import LinearPotential
-from didypro.ner.viterbi import Viterbi
-from didypro._allennlp.modules.viterbi import viterbi as viterbi_ad
+from didyprog.ner.potential import LinearPotential
+from didyprog.ner.viterbi import Viterbi
+from didyprog._allennlp.modules.viterbi import viterbi as viterbi_ad
 
 torch.manual_seed(0)
 torch.cuda.manual_seed_all(0)

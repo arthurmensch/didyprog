@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
-from didypro.utils import make_data
+from didyprog.utils import make_data
 from scipy.optimize import check_grad
 
-from didypro.reference.viterbi import viterbi_grad, viterbi_value, \
+from didyprog.reference.viterbi import viterbi_grad, viterbi_value, \
     viterbi_hessian_prod
 
 
